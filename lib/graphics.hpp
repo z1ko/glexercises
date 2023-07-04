@@ -7,6 +7,9 @@
 #include <vector>
 #include <cassert>
 
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image/stb_image.h>
+
 namespace glib {
 
 using index_t = unsigned int;
@@ -28,6 +31,10 @@ struct program_t {
   unsigned int id;
 };
 
+struct texture_t {
+  unsigned int id;
+};
+
 // Basic position layout
 std::function<void(void)> basic_layout = [](){
   // Position
@@ -45,6 +52,19 @@ std::function<void(void)> color_layout = [](){
   glEnableVertexAttribArray(1);
 };
 
+// Position + Color + UV layout
+std::function<void(void)> texture_layout = []() {
+  // Position
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+  glEnableVertexAttribArray(0);
+  // Color
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3* sizeof(float)));
+  glEnableVertexAttribArray(1);
+  // UV
+  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+  glEnableVertexAttribArray(2);  
+};
+
 // Create a VAO using a VBO and a EBO, a lambda is used to determine the attributes layout
 buffer_t buffer_create(std::vector<float> *data, std::vector<index_t> *indices, std::function<void(void)>& lambda = basic_layout);
 #define buffer_bind(buffer) glBindVertexArray(buffer.vao)
@@ -55,8 +75,13 @@ program_t program_create(const char* vertex, const char* fragment);
 #define program_bind(program) glUseProgram(program.id)
 #define program_unbind() glUseProgram(0)
 
+void program_uniform_1i(const program_t &program, const char* name, int value);
 void program_uniform_1f(const program_t &program, const char* name, float value);
 void program_uniform_3f(const program_t &program, const char* name, float x, float y, float z);
+
+texture_t texture_load(const char* path, unsigned int format, unsigned int wrapping);
+void texture_bind(const texture_t &texture, int slot);
+#define texture_unbind() glBindTexture(GL_TEXTURE_2D, 0);
 
 // Render a buffer with a program
 void render(const buffer_t &buffer, const program_t &program);
@@ -186,6 +211,12 @@ void render(const buffer_t &buffer, const program_t &program) {
   program_unbind();
 }
 
+void program_uniform_1i(const program_t &program, const char* name, int value) {
+  program_bind(program);
+  glUniform1i(glGetUniformLocation(program.id, name), value);
+  program_unbind();
+}
+
 void program_uniform_1f(const program_t &program, const char* name, float value) {
   program_bind(program);
   glUniform1f(glGetUniformLocation(program.id, name), value);
@@ -196,6 +227,41 @@ void program_uniform_3f(const program_t &program, const char* name, float x, flo
   program_bind(program);
   glUniform3f(glGetUniformLocation(program.id, name), x, y, z);
   program_unbind();
+}
+
+texture_t texture_load(const char* path, unsigned int format, unsigned int wrapping) {
+
+  int width, height, channels;
+  unsigned char *data = stbi_load(path, &width, &height, &channels, 0);
+  if (data == NULL) {
+    std::cout << "ERROR::TEXTURE: Unable to load " << path << "\n";
+    exit(1);
+  }
+
+  unsigned int tid;
+  glGenTextures(1, &tid);
+  glBindTexture(GL_TEXTURE_2D, tid);
+  {
+    // Texture parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapping);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapping);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+    glGenerateMipmap(GL_TEXTURE_2D);
+  }
+  glBindTexture(GL_TEXTURE_2D, 0);
+
+  stbi_image_free(data);
+  return {
+    .id = tid
+  };
+}
+
+void texture_bind(const texture_t &texture, int slot) {
+  glActiveTexture(GL_TEXTURE0 + slot);
+  glBindTexture(GL_TEXTURE_2D, texture.id);
 }
 
 #endif
