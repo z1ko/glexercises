@@ -78,6 +78,7 @@ program_t program_create(const char* vertex, const char* fragment);
 void program_uniform_1i(const program_t &program, const char* name, int value);
 void program_uniform_1f(const program_t &program, const char* name, float value);
 void program_uniform_3f(const program_t &program, const char* name, float x, float y, float z);
+void program_uniform_mf(const program_t &program, const char* name, float *data);
 
 texture_t texture_load(const char* path, unsigned int format, unsigned int wrapping);
 void texture_bind(const texture_t &texture, int slot);
@@ -226,6 +227,12 @@ void program_uniform_1f(const program_t &program, const char* name, float value)
 void program_uniform_3f(const program_t &program, const char* name, float x, float y, float z) {
   program_bind(program);
   glUniform3f(glGetUniformLocation(program.id, name), x, y, z);
+  program_unbind();
+}
+
+void program_uniform_mf(const program_t &program, const char* name, float *data) {
+  program_bind(program);
+  glUniformMatrix4fv(glGetUniformLocation(program.id, name), 1, GL_FALSE, data);
   program_unbind();
 }
 
