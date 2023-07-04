@@ -30,8 +30,19 @@ struct program_t {
 
 // Basic position layout
 std::function<void(void)> basic_layout = [](){
+  // Position
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
   glEnableVertexAttribArray(0);
+};
+
+// Basic position + color layout
+std::function<void(void)> color_layout = [](){
+  // Position
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+  glEnableVertexAttribArray(0);
+  // Color
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3* sizeof(float)));
+  glEnableVertexAttribArray(1);
 };
 
 // Create a VAO using a VBO and a EBO, a lambda is used to determine the attributes layout
@@ -43,6 +54,9 @@ buffer_t buffer_create(std::vector<float> *data, std::vector<index_t> *indices, 
 program_t program_create(const char* vertex, const char* fragment);
 #define program_bind(program) glUseProgram(program.id)
 #define program_unbind() glUseProgram(0)
+
+void program_uniform_1f(const program_t &program, const char* name, float value);
+void program_uniform_3f(const program_t &program, const char* name, float x, float y, float z);
 
 // Render a buffer with a program
 void render(const buffer_t &buffer, const program_t &program);
@@ -169,6 +183,18 @@ void render(const buffer_t &buffer, const program_t &program) {
   }
 
   buffer_unbind();
+  program_unbind();
+}
+
+void program_uniform_1f(const program_t &program, const char* name, float value) {
+  program_bind(program);
+  glUniform1f(glGetUniformLocation(program.id, name), value);
+  program_unbind();
+}
+
+void program_uniform_3f(const program_t &program, const char* name, float x, float y, float z) {
+  program_bind(program);
+  glUniform3f(glGetUniformLocation(program.id, name), x, y, z);
   program_unbind();
 }
 
