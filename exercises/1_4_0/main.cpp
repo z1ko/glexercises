@@ -37,19 +37,19 @@ int main(int argc, char** argv) {
   glViewport(0, 0, 640, 480);
 
   // Data of triangle
-  glib::vertex_t vertices[] = {
-    { 0.5f,  0.5f, 0.0f },
-    { 0.5f, -0.5f, 0.0f },
-    {-0.5f, -0.5f, 0.0f },
-    {-0.5f,  0.5f, 0.0f }
+  std::vector<float> vertices = {
+     0.5f,  0.5f, 0.0f,
+     0.5f, -0.5f, 0.0f,
+    -0.5f, -0.5f, 0.0f,
+    -0.5f,  0.5f, 0.0f
   };
 
-  glib::index_t indices[] = {
+  std::vector<glib::index_t> indices = {
     0, 1, 3,
     1, 2, 3
   };
 
-  glib::buffer_t triangle = glib::buffer_create(vertices, 12, indices, 6);
+  glib::buffer_t triangle = glib::buffer_create(&vertices, &indices);
   glib::program_t program = glib::program_create(shader_vertex, shader_fragment);
 
   glClearColor(0.25f, 0.5f, 0.75f, 1.0f);

@@ -36,20 +36,21 @@ int main(int argc, char** argv) {
   if (window == NULL) { return -1; }
   glViewport(0, 0, 640, 480);
 
-  glib::vertex_t vertices[] = {
+  std::vector<float> vertices = {
     
     // first triangle
-    { -0.9f, -0.5f, 0.0f },
-    { -0.0f, -0.5f, 0.0f },
-    { -0.45f, 0.5f, 0.0f },
+    -0.9f, -0.5f, 0.0f,
+    -0.0f, -0.5f, 0.0f,
+    -0.45f, 0.5f, 0.0f,
     
     // second triangle
-    {  0.0f, -0.5f, 0.0f },
-    {  0.9f, -0.5f, 0.0f },
-    {  0.45f, 0.5f, 0.0f }
+     0.0f, -0.5f, 0.0f,
+     0.9f, -0.5f, 0.0f,
+     0.45f, 0.5f, 0.0f
   };
 
-  glib::buffer_t triangle = glib::buffer_create(vertices, 6, NULL, 0);
+
+  glib::buffer_t triangle = glib::buffer_create(&vertices, NULL);
   glib::program_t program = glib::program_create(shader_vertex, shader_fragment);
 
   glClearColor(0.25f, 0.5f, 0.75f, 1.0f);

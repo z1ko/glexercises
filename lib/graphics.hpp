@@ -3,12 +3,11 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 #include <cstdlib>
+#include <functional>
+#include <vector>
+#include <cassert>
 
 namespace glib {
-
-struct vertex_t {
-  float x, y, z;
-};
 
 using index_t = unsigned int;
 
@@ -29,8 +28,14 @@ struct program_t {
   unsigned int id;
 };
 
-// Create a VAO using a VBO and a EBO
-buffer_t buffer_create(vertex_t *v, unsigned int v_count, index_t *e, unsigned int e_count);
+// Basic position layout
+std::function<void(void)> basic_layout = [](){
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+  glEnableVertexAttribArray(0);
+};
+
+// Create a VAO using a VBO and a EBO, a lambda is used to determine the attributes layout
+buffer_t buffer_create(std::vector<float> *data, std::vector<index_t> *indices, std::function<void(void)>& lambda = basic_layout);
 #define buffer_bind(buffer) glBindVertexArray(buffer.vao)
 #define buffer_unbind() glBindVertexArray(0)
 
@@ -45,16 +50,18 @@ void render(const buffer_t &buffer, const program_t &program);
 #ifdef GLIB_GRAPHICS_IMPL
 #undef GLIB_GRAPHICS_IMPL
 
-buffer_t buffer_create(vertex_t *v, unsigned int v_count, index_t *e, unsigned int e_count) {
-  
+buffer_t buffer_create(std::vector<float> *data, std::vector<index_t> *indices, std::function<void(void)>& lambda) {
+  assert(data && "Data must be provided!");
+
   buffer_t result = { };
-  result.v_count = v_count;
-  result.e_count = e_count;
+  result.v_count = data->size();
 
   // How to draw the element
   result.draw = GLIB_DRAW_ARRAYS;
-  if (e != NULL)
+  if (indices != NULL) {
+  result.e_count = indices->size();
     result.draw = GLIB_DRAW_ELEMENTS;
+  }
 
   glGenVertexArrays(1, &result.vao);
   glBindVertexArray(result.vao);
@@ -63,19 +70,23 @@ buffer_t buffer_create(vertex_t *v, unsigned int v_count, index_t *e, unsigned i
     glBindBuffer(GL_ARRAY_BUFFER, result.vbo);
     {
       // Set buffer data
-      glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_t) * v_count, v, GL_STATIC_DRAW);
+      glBufferData(GL_ARRAY_BUFFER, sizeof(float) * result.v_count, data->data(), GL_STATIC_DRAW);
       // Set buffer layout
+      lambda();
+
+      /*
       glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
       glEnableVertexAttribArray(0);
+      */
     }
 
     // Add elements buffer 
-    if (e != NULL) {
+    if (indices != NULL) {
       glGenBuffers(1, &result.ebo);
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, result.ebo);
       {
         // Set buffer data
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(index_t) * e_count, e, GL_STATIC_DRAW);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(index_t) * result.e_count, indices->data(), GL_STATIC_DRAW);
       }
     }
   }
