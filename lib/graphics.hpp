@@ -261,6 +261,7 @@ texture_t texture_load(const char* path, unsigned int format, unsigned int wrapp
   glBindTexture(GL_TEXTURE_2D, 0);
 
   stbi_image_free(data);
+  printf("loaded texture(id: %d)\n", tid);
   return {
     .id = tid
   };
