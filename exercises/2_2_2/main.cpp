@@ -148,12 +148,21 @@ int main(int argc, char** argv) {
     proj = glm::perspective(glm::radians(FOV), ASPECT_RATIO, 0.1f, 100.0f);
     glib::program_uniform_mf(program, "proj", glm::value_ptr(proj));
 
+    // Normal cube
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
     glib::program_uniform_mf(program, "model", glm::value_ptr(model));
-
     glib::texture_bind(texture1, 0);
     glib::render(cube, program);
+
+    // Light cube
+    model = glm::mat4(1.0f);
+    model = glm::translate(model, light_pos);
+    model = glm::scale(model, glm::vec3(0.2f));
+    glib::program_uniform_mf(program, "model", glm::value_ptr(model));
+    glib::texture_bind(texture1, 0);
+    glib::render(cube, program);
+
 
     glfwSwapBuffers(window);
     glfwPollEvents();
