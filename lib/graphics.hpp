@@ -66,7 +66,7 @@ std::function<void(void)> texture_layout = []() {
 };
 
 // Create a VAO using a VBO and a EBO, a lambda is used to determine the attributes layout
-buffer_t buffer_create(std::vector<float> *data, std::vector<index_t> *indices, std::function<void(void)>& lambda = basic_layout);
+buffer_t buffer_create(std::vector<float> *data, std::vector<index_t> *indices, std::function<void(void)> lambda = basic_layout);
 #define buffer_bind(buffer) glBindVertexArray(buffer.vao)
 #define buffer_unbind() glBindVertexArray(0)
 
@@ -90,7 +90,7 @@ void render(const buffer_t &buffer, const program_t &program);
 #ifdef GLIB_GRAPHICS_IMPL
 #undef GLIB_GRAPHICS_IMPL
 
-buffer_t buffer_create(std::vector<float> *data, std::vector<index_t> *indices, std::function<void(void)>& lambda) {
+buffer_t buffer_create(std::vector<float> *data, std::vector<index_t> *indices, std::function<void(void)> lambda) {
   assert(data && "Data must be provided!");
 
   buffer_t result = { };
