@@ -65,6 +65,16 @@ std::function<void(void)> texture_layout = []() {
   glEnableVertexAttribArray(2);  
 };
 
+// Position + Normal + Coords
+std::function<void(void)> layout_3F3F2F = []() {
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+  glEnableVertexAttribArray(0);
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3* sizeof(float)));
+  glEnableVertexAttribArray(1);
+  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+  glEnableVertexAttribArray(2);
+};
+
 // Create a VAO using a VBO and a EBO, a lambda is used to determine the attributes layout
 buffer_t buffer_create(std::vector<float> *data, std::vector<index_t> *indices, std::function<void(void)> lambda = basic_layout);
 #define buffer_bind(buffer) glBindVertexArray(buffer.vao)
@@ -237,6 +247,7 @@ void program_uniform_mf(const program_t &program, const char* name, float *data)
 }
 
 texture_t texture_load(const char* path, unsigned int format, unsigned int wrapping) {
+  stbi_set_flip_vertically_on_load(true);
 
   int width, height, channels;
   unsigned char *data = stbi_load(path, &width, &height, &channels, 0);
