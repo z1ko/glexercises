@@ -41,6 +41,7 @@ void model_render(const model_t &model, const program_t &program) {
     // Bind standard textures
     glib::texture_bind(mesh.albedo,   0); // diffuse
     glib::texture_bind(mesh.specular, 1); // specular
+    glib::texture_bind(mesh.normal,   2); // normal
 
     glib::render(mesh.buffer, program);
   }
@@ -49,7 +50,7 @@ void model_render(const model_t &model, const program_t &program) {
 // Load only the first one
 static texture_t process_material_texture(aiMaterial *material, aiTextureType type, const std::string &folder) {
   if (material->GetTextureCount(type) == 0) {
-    std::cout << "ERROR::ASSIMP::" << "No texture for " << type << "type" << std::endl;
+    std::cout << "ERROR::ASSIMP::" << "No texture for " << type << " type" << std::endl;
     exit(1);
   }
 
@@ -60,7 +61,14 @@ static texture_t process_material_texture(aiMaterial *material, aiTextureType ty
   // Contains all previous loaded textures
   static std::unordered_map<std::string, texture_t> loaded_textures;
   if (loaded_textures.find(path) == loaded_textures.end()) {
+
     std::cout << "loading texture at " << path << "\n";
+    std::string ext = path.substr(path.find_last_of('.'), path.size());
+
+    int format = GL_RGB;
+    if (ext == ".png")
+      format = GL_RGBA;
+
     texture_t texture = texture_load(path.c_str(), GL_RGB, GL_REPEAT);
     loaded_textures.insert({{path, texture}});
   }
@@ -131,7 +139,7 @@ static void process_mesh(model_t &model, aiMesh *mesh, const aiScene *scene, con
     aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
     result.albedo   = process_material_texture(material, aiTextureType_DIFFUSE, folder);
     result.specular = process_material_texture(material, aiTextureType_SPECULAR, folder);
-    //result.normal   = process_material_texture(material);
+    result.normal   = process_material_texture(material, aiTextureType_NORMALS, folder);
   }
 
   model.meshes.push_back(result);
