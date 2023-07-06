@@ -65,14 +65,16 @@ std::function<void(void)> texture_layout = []() {
   glEnableVertexAttribArray(2);  
 };
 
-// Position + Normal + Coords
-std::function<void(void)> layout_3F3F2F = []() {
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-  glEnableVertexAttribArray(0);
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3* sizeof(float)));
-  glEnableVertexAttribArray(1);
-  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-  glEnableVertexAttribArray(2);
+// Position + Normal + Tangent + Coords
+std::function<void(void)> layout_3F3F3F2F = []() {
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)0);
+  glEnableVertexAttribArray(0); // Position
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(3* sizeof(float)));
+  glEnableVertexAttribArray(1); // Normal
+  glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(6 * sizeof(float)));
+  glEnableVertexAttribArray(2); // Tangent
+  glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(9 * sizeof(float)));
+  glEnableVertexAttribArray(3);
 };
 
 // Create a VAO using a VBO and a EBO, a lambda is used to determine the attributes layout

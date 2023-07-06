@@ -33,12 +33,27 @@ const std::vector<glm::vec3> cube_positions = {
 const int WIDTH = 1600;
 const int HEIGHT = 900;
 
+const char* shader_vertex_light = R"(
+#version 330 core
+layout (location = 0) in vec3 aPos;
+
+uniform mat4 model;
+uniform mat4 view;
+uniform mat4 proj;
+
+void main() {
+  gl_Position = proj * view * model * vec4(aPos, 1.0);
+}
+
+)";
+
 const char* shader_vertex = R"(
 
 #version 330 core
 layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec3 aNormal;
-layout (location = 2) in vec2 aUV;
+layout (location = 2) in vec3 aTangent;
+layout (location = 3) in vec2 aUV;
 
 out vec3 frag_pos;
 out vec3 normal;
@@ -56,7 +71,6 @@ void main() {
 }
 
 )";
-
 const char* shader_fragment = R"(
 
 #version 330 core
@@ -209,14 +223,14 @@ int main(int argc, char** argv) {
   
   glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
-  std::vector<float> vertices = glib::mesh_cube_with_normals_and_uvs();
-  glib::buffer_t cube = glib::buffer_create(&vertices, NULL, glib::layout_3F3F2F);
+  std::vector<float> vertices = glib::mesh_cube();
+  glib::buffer_t cube = glib::buffer_create(&vertices, NULL, glib::basic_layout);
 
   // Load model of backpack
   glib::model_t backpack = glib::model_load("/home/z1ko/univr/graphics/data/models/backpack/backpack.obj");
 
   glib::program_t program = glib::program_create(shader_vertex, shader_fragment);
-  glib::program_t program_light = glib::program_create(shader_vertex, shader_fragment_light);
+  glib::program_t program_light = glib::program_create(shader_vertex_light, shader_fragment_light);
 
   const float FOV = 45.0f;
   const float ASPECT_RATIO = (float)WIDTH/HEIGHT;

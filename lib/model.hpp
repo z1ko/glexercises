@@ -82,7 +82,6 @@ static void process_mesh(model_t &model, aiMesh *mesh, const aiScene *scene, con
     float y = mesh->mVertices[i].y;
     float z = mesh->mVertices[i].z;
    
-    //printf("position(%f, %f, %f)\n", x, y, z);
     vertices.push_back(x);
     vertices.push_back(y);
     vertices.push_back(z);
@@ -92,10 +91,18 @@ static void process_mesh(model_t &model, aiMesh *mesh, const aiScene *scene, con
     float ny = mesh->mNormals[i].y; 
     float nz = mesh->mNormals[i].z; 
 
-    //printf("normal(%f, %f, %f)\n", nx, ny, nz);
     vertices.push_back(nx);
     vertices.push_back(ny);
     vertices.push_back(nz);
+
+    // Tangent
+    float tx = mesh->mTangents[i].x;
+    float ty = mesh->mTangents[i].y;
+    float tz = mesh->mTangents[i].z;
+
+    vertices.push_back(tx);
+    vertices.push_back(ty);
+    vertices.push_back(tz);
 
     // UVs
     float u = 0.0f, v = 0.0f;
@@ -104,7 +111,6 @@ static void process_mesh(model_t &model, aiMesh *mesh, const aiScene *scene, con
       v = mesh->mTextureCoords[0][i].y;
     }
 
-    //printf("uv(%f, %f)\n", u, v);
     vertices.push_back(u);
     vertices.push_back(v);
   }
@@ -117,7 +123,7 @@ static void process_mesh(model_t &model, aiMesh *mesh, const aiScene *scene, con
   }
 
   mesh_t result = {
-    .buffer = buffer_create(&vertices, &indices, glib::layout_3F3F2F)
+    .buffer = buffer_create(&vertices, &indices, glib::layout_3F3F3F2F)
   };
 
   // Process material
@@ -151,7 +157,7 @@ model_t model_load(const char* filepath) {
   model_t result;
 
   Assimp::Importer importer;
-  const aiScene *scene = importer.ReadFile(filepath, aiProcess_Triangulate | aiProcess_FlipUVs);
+  const aiScene *scene = importer.ReadFile(filepath, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
   if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
     std::cout << "ERROR::ASSIMP::" << importer.GetErrorString() << std::endl;
     exit(1);
