@@ -1,13 +1,13 @@
 #pragma once
 
 #include <GLFW/glfw3.h>
-#include <iostream>
-#include <cstdlib>
-#include <functional>
-#include <vector>
 #include <cassert>
+#include <cstdlib>
 #include <fstream>
+#include <functional>
+#include <iostream>
 #include <sstream>
+#include <vector>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image/stb_image.h>
@@ -17,11 +17,7 @@ namespace glib {
 using index_t = unsigned int;
 
 // How to draw the buffer
-enum buffer_draw_e 
-{
-  GLIB_DRAW_ARRAYS,
-  GLIB_DRAW_ELEMENTS
-};
+enum buffer_draw_e { GLIB_DRAW_ARRAYS, GLIB_DRAW_ELEMENTS };
 
 struct buffer_t {
   buffer_draw_e draw;
@@ -38,83 +34,108 @@ struct texture_t {
 };
 
 // Basic position layout
-std::function<void(void)> basic_layout = [](){
+std::function<void(void)> basic_layout = []() {
   // Position
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
   glEnableVertexAttribArray(0);
 };
 
 // Basic position + color layout
-std::function<void(void)> color_layout = [](){
+std::function<void(void)> color_layout = []() {
   // Position
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)0);
   glEnableVertexAttribArray(0);
   // Color
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3* sizeof(float)));
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float),
+                        (void *)(3 * sizeof(float)));
   glEnableVertexAttribArray(1);
 };
 
 // Position + Color + UV layout
 std::function<void(void)> texture_layout = []() {
   // Position
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)0);
   glEnableVertexAttribArray(0);
   // Color
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3* sizeof(float)));
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
+                        (void *)(3 * sizeof(float)));
   glEnableVertexAttribArray(1);
   // UV
-  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-  glEnableVertexAttribArray(2);  
+  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
+                        (void *)(6 * sizeof(float)));
+  glEnableVertexAttribArray(2);
 };
 
 // Position + Normal + Tangent + Coords
 std::function<void(void)> layout_3F3F3F2F = []() {
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float),
+                        (void *)0);
   glEnableVertexAttribArray(0); // Position
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(3* sizeof(float)));
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float),
+                        (void *)(3 * sizeof(float)));
   glEnableVertexAttribArray(1); // Normal
-  glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(6 * sizeof(float)));
+  glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float),
+                        (void *)(6 * sizeof(float)));
   glEnableVertexAttribArray(2); // Tangent
-  glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(9 * sizeof(float)));
+  glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, 11 * sizeof(float),
+                        (void *)(9 * sizeof(float)));
   glEnableVertexAttribArray(3);
 };
 
-// Create a VAO using a VBO and a EBO, a lambda is used to determine the attributes layout
-buffer_t buffer_create(std::vector<float> *data, std::vector<index_t> *indices, std::function<void(void)> lambda = basic_layout);
+std::function<void(void)> layout_3F2F = []() {
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)0);
+  glEnableVertexAttribArray(0); // Position
+  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
+                        (void *)(3 * sizeof(float)));
+  glEnableVertexAttribArray(1); // UV
+};
+
+// Create a VAO using a VBO and a EBO, a lambda is used to determine the
+// attributes layout
+buffer_t buffer_create(std::vector<float> *data, std::vector<index_t> *indices,
+                       std::function<void(void)> lambda = basic_layout);
 #define buffer_bind(buffer) glBindVertexArray(buffer.vao)
 #define buffer_unbind() glBindVertexArray(0)
 
 // Create program from vertex and fragment source
-program_t program_create(const char* vertex, const char* fragment);
-program_t program_load(const char* filepath);
+program_t program_create(const char *vertex, const char *fragment);
+program_t program_load(const char *filepath);
 #define program_bind(program) glUseProgram(program.id)
 #define program_unbind() glUseProgram(0)
 
-void program_uniform_1i(const program_t &program, const char* name, int value);
-void program_uniform_1f(const program_t &program, const char* name, float value);
-void program_uniform_3f(const program_t &program, const char* name, float x, float y, float z);
-void program_uniform_mf(const program_t &program, const char* name, float *data);
+void program_uniform_1i(const program_t &program, const char *name, int value);
+void program_uniform_1f(const program_t &program, const char *name,
+                        float value);
+void program_uniform_2f(const program_t &program, const char *name, float x,
+                        float y);
+void program_uniform_3f(const program_t &program, const char *name, float x,
+                        float y, float z);
+void program_uniform_mf(const program_t &program, const char *name,
+                        float *data);
 
-texture_t texture_load(const char* path, unsigned int format, unsigned int wrapping);
+texture_t texture_load(const char *path, unsigned int format,
+                       unsigned int wrapping);
 void texture_bind(const texture_t &texture, int slot);
 #define texture_unbind() glBindTexture(GL_TEXTURE_2D, 0);
 
 // Render a buffer with a program
-void render(const buffer_t &buffer, const program_t &program);
+void render(const buffer_t &buffer, const program_t &program,
+            unsigned int mode = GL_TRIANGLES);
 
 #ifdef GLIB_GRAPHICS_IMPL
 #undef GLIB_GRAPHICS_IMPL
 
-buffer_t buffer_create(std::vector<float> *data, std::vector<index_t> *indices, std::function<void(void)> lambda) {
+buffer_t buffer_create(std::vector<float> *data, std::vector<index_t> *indices,
+                       std::function<void(void)> lambda) {
   assert(data && "Data must be provided!");
 
-  buffer_t result = { };
+  buffer_t result = {};
   result.v_count = data->size();
 
   // How to draw the element
   result.draw = GLIB_DRAW_ARRAYS;
   if (indices != NULL) {
-  result.e_count = indices->size();
+    result.e_count = indices->size();
     result.draw = GLIB_DRAW_ELEMENTS;
   }
 
@@ -125,29 +146,32 @@ buffer_t buffer_create(std::vector<float> *data, std::vector<index_t> *indices, 
     glBindBuffer(GL_ARRAY_BUFFER, result.vbo);
     {
       // Set buffer data
-      glBufferData(GL_ARRAY_BUFFER, sizeof(float) * result.v_count, data->data(), GL_STATIC_DRAW);
+      glBufferData(GL_ARRAY_BUFFER, sizeof(float) * result.v_count,
+                   data->data(), GL_STATIC_DRAW);
       // Set buffer layout
       lambda();
 
       /*
-      glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-      glEnableVertexAttribArray(0);
+      glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float),
+      (void*)0); glEnableVertexAttribArray(0);
       */
     }
 
-    // Add elements buffer 
+    // Add elements buffer
     if (indices != NULL) {
       glGenBuffers(1, &result.ebo);
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, result.ebo);
       {
         // Set buffer data
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(index_t) * result.e_count, indices->data(), GL_STATIC_DRAW);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(index_t) * result.e_count,
+                     indices->data(), GL_STATIC_DRAW);
       }
     }
   }
   glBindVertexArray(0);
 
-  printf("created buffer(vao: %d, vbo: %d, ebo: %d)\n", result.vao, result.vbo, result.ebo);
+  printf("created buffer(vao: %d, vbo: %d, ebo: %d)\n", result.vao, result.vbo,
+         result.ebo);
   return result;
 }
 
@@ -155,18 +179,18 @@ static inline bool check_shader_compilation(unsigned int id) {
 
   int success;
   glGetShaderiv(id, GL_COMPILE_STATUS, &success);
-  if(!success) {
+  if (!success) {
     char infoLog[512];
     glGetShaderInfoLog(id, 512, NULL, infoLog);
-    std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
+    std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n"
+              << infoLog << std::endl;
     exit(1);
   }
 
   return success;
 }
 
-static inline bool 
-check_shader_linking(unsigned int id) {
+static inline bool check_shader_linking(unsigned int id) {
 
   printf("B\n");
 
@@ -183,8 +207,8 @@ check_shader_linking(unsigned int id) {
   return success;
 }
 
-program_t program_create(const char* vertex, const char* fragment) {
-  
+program_t program_create(const char *vertex, const char *fragment) {
+
   unsigned int vid = glCreateShader(GL_VERTEX_SHADER);
   glShaderSource(vid, 1, &vertex, NULL);
 
@@ -200,7 +224,7 @@ program_t program_create(const char* vertex, const char* fragment) {
   unsigned int sid = glCreateProgram();
   glAttachShader(sid, vid);
   glAttachShader(sid, fid);
-  
+
   printf("A\n");
   glLinkProgram(sid);
   printf("B\n");
@@ -210,56 +234,66 @@ program_t program_create(const char* vertex, const char* fragment) {
   glDeleteShader(fid);
 
   printf("created program(id: %d)\n", sid);
-  return {
-    .id = sid
-  };
+  return {.id = sid};
 }
 
-void render(const buffer_t &buffer, const program_t &program) {
+void render(const buffer_t &buffer, const program_t &program,
+            unsigned int mode) {
   program_bind(program);
   buffer_bind(buffer);
 
   switch (buffer.draw) {
-    case GLIB_DRAW_ARRAYS:
-      glDrawArrays(GL_TRIANGLES, 0, buffer.v_count);
-      break;
-    case GLIB_DRAW_ELEMENTS:
-      glDrawElements(GL_TRIANGLES, buffer.e_count, GL_UNSIGNED_INT, 0);
-      break;
-    default:
-      printf("Unknown draw mode!\n");  
-      break;
+  case GLIB_DRAW_ARRAYS:
+    glDrawArrays(mode, 0, buffer.v_count);
+    break;
+  case GLIB_DRAW_ELEMENTS:
+    glDrawElements(mode, buffer.e_count, GL_UNSIGNED_INT, 0);
+    break;
+  default:
+    printf("Unknown draw mode!\n");
+    break;
   }
 
   buffer_unbind();
   program_unbind();
 }
 
-void program_uniform_1i(const program_t &program, const char* name, int value) {
+void program_uniform_1i(const program_t &program, const char *name, int value) {
   program_bind(program);
   glUniform1i(glGetUniformLocation(program.id, name), value);
   program_unbind();
 }
 
-void program_uniform_1f(const program_t &program, const char* name, float value) {
+void program_uniform_1f(const program_t &program, const char *name,
+                        float value) {
   program_bind(program);
   glUniform1f(glGetUniformLocation(program.id, name), value);
   program_unbind();
 }
 
-void program_uniform_3f(const program_t &program, const char* name, float x, float y, float z) {
+void program_uniform_2f(const program_t &program, const char *name, float x,
+                        float y) {
+  program_bind(program);
+  glUniform2f(glGetUniformLocation(program.id, name), x, y);
+  program_unbind();
+}
+
+void program_uniform_3f(const program_t &program, const char *name, float x,
+                        float y, float z) {
   program_bind(program);
   glUniform3f(glGetUniformLocation(program.id, name), x, y, z);
   program_unbind();
 }
 
-void program_uniform_mf(const program_t &program, const char* name, float *data) {
+void program_uniform_mf(const program_t &program, const char *name,
+                        float *data) {
   program_bind(program);
   glUniformMatrix4fv(glGetUniformLocation(program.id, name), 1, GL_FALSE, data);
   program_unbind();
 }
 
-texture_t texture_load(const char* path, unsigned int format, unsigned int wrapping) {
+texture_t texture_load(const char *path, unsigned int format,
+                       unsigned int wrapping) {
   stbi_set_flip_vertically_on_load(true);
 
   int width, height, channels;
@@ -276,19 +310,19 @@ texture_t texture_load(const char* path, unsigned int format, unsigned int wrapp
     // Texture parameters
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapping);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapping);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+                    GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, format,
+                 GL_UNSIGNED_BYTE, data);
     glGenerateMipmap(GL_TEXTURE_2D);
   }
   glBindTexture(GL_TEXTURE_2D, 0);
 
   stbi_image_free(data);
   printf("loaded texture(id: %d)\n", tid);
-  return {
-    .id = tid
-  };
+  return {.id = tid};
 }
 
 void texture_bind(const texture_t &texture, int slot) {

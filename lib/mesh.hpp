@@ -1,6 +1,18 @@
 #pragma once
 
+#include <vector>
+
 namespace glib {
+// clang-format off
+
+inline std::vector<float> mesh_screen_ndc() {
+  return std::vector<float> {
+     -1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
+     -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+      1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
+      1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+  };
+}
 
 inline std::vector<float> mesh_cube() {
   return {
@@ -141,4 +153,5 @@ inline std::vector<float> mesh_cube_with_normals_and_uvs() {
     };
 }
 
+// clang-format on
 } // namespace glib
