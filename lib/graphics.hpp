@@ -6,6 +6,8 @@
 #include <functional>
 #include <vector>
 #include <cassert>
+#include <fstream>
+#include <sstream>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image/stb_image.h>
@@ -84,6 +86,7 @@ buffer_t buffer_create(std::vector<float> *data, std::vector<index_t> *indices, 
 
 // Create program from vertex and fragment source
 program_t program_create(const char* vertex, const char* fragment);
+program_t program_load(const char* filepath);
 #define program_bind(program) glUseProgram(program.id)
 #define program_unbind() glUseProgram(0)
 
@@ -165,12 +168,15 @@ static inline bool check_shader_compilation(unsigned int id) {
 static inline bool 
 check_shader_linking(unsigned int id) {
 
+  printf("B\n");
+
   int success;
   glGetProgramiv(id, GL_LINK_STATUS, &success);
   if (!success) {
+    printf("A\n");
     char infoLog[512];
     glGetProgramInfoLog(id, 512, NULL, infoLog);
-    std::cout << "ERROR::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
+    std::cout << "ERROR::PROGRAM::LINKING_FAILED:" << infoLog << std::endl;
     exit(1);
   }
 
@@ -194,11 +200,16 @@ program_t program_create(const char* vertex, const char* fragment) {
   unsigned int sid = glCreateProgram();
   glAttachShader(sid, vid);
   glAttachShader(sid, fid);
+  
+  printf("A\n");
   glLinkProgram(sid);
+  printf("B\n");
+  check_shader_linking(sid);
 
   glDeleteShader(vid);
   glDeleteShader(fid);
 
+  printf("created program(id: %d)\n", sid);
   return {
     .id = sid
   };
