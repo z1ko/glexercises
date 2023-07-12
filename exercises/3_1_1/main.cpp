@@ -1,6 +1,6 @@
 
-#include <iostream>
 #include <cmath>
+#include <iostream>
 
 #define GLIB_INIT_IMPL
 #include <initialization.hpp>
@@ -18,22 +18,16 @@
 #include <model.hpp>
 
 const std::vector<glm::vec3> cube_positions = {
-  glm::vec3(  0.0f,  0.0f,   0.0f ),
-  glm::vec3(  2.0f,  5.0f, -15.0f ),
-  glm::vec3( -1.5f, -2.2f,  -2.5f ),
-  glm::vec3( -3.8f, -2.0f, -12.3f ),
-  glm::vec3(  2.4f, -0.4f,  -3.5f ),
-  glm::vec3( -1.7f,  3.0f,  -7.5f ),
-  glm::vec3(  1.3f, -2.0f,  -2.5f ),
-  glm::vec3(  1.5f,  2.0f,  -2.5f ),
-  glm::vec3(  1.5f,  0.2f,  -1.5f ),
-  glm::vec3( -1.3f,  1.0f,  -1.5f )
-};
+    glm::vec3(0.0f, 0.0f, 0.0f),    glm::vec3(2.0f, 5.0f, -15.0f),
+    glm::vec3(-1.5f, -2.2f, -2.5f), glm::vec3(-3.8f, -2.0f, -12.3f),
+    glm::vec3(2.4f, -0.4f, -3.5f),  glm::vec3(-1.7f, 3.0f, -7.5f),
+    glm::vec3(1.3f, -2.0f, -2.5f),  glm::vec3(1.5f, 2.0f, -2.5f),
+    glm::vec3(1.5f, 0.2f, -1.5f),   glm::vec3(-1.3f, 1.0f, -1.5f)};
 
 const int WIDTH = 1600;
 const int HEIGHT = 900;
 
-const char* shader_vertex_light = R"(
+const char *shader_vertex_light = R"(
 #version 330 core
 layout (location = 0) in vec3 aPos;
 
@@ -47,7 +41,7 @@ void main() {
 
 )";
 
-const char* shader_vertex = R"(
+const char *shader_vertex = R"(
 
 #version 330 core
 layout (location = 0) in vec3 aPos;
@@ -71,7 +65,7 @@ void main() {
 }
 
 )";
-const char* shader_fragment = R"(
+const char *shader_fragment = R"(
 
 #version 330 core
 out vec4 FragColor;
@@ -198,7 +192,7 @@ void main() {
 
 )";
 
-const char* shader_fragment_light = R"(
+const char *shader_fragment_light = R"(
 #version 330 core
 out vec4 FragColor;
 void main() {
@@ -206,34 +200,40 @@ void main() {
 }
 )";
 
-void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-void mouse_callback(GLFWwindow* window, double xpos, double ypos);
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
+void framebuffer_size_callback(GLFWwindow *window, int width, int height);
+void mouse_callback(GLFWwindow *window, double xpos, double ypos);
+void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
 
 glib::camera_t camera = glib::camera_base(glm::vec3(0.0f, 0.0f, 3.0f));
-float lastX = WIDTH  / 2.0f;
+float lastX = WIDTH / 2.0f;
 float lastY = HEIGHT / 2.0f;
 bool firstMouse = true;
 
-int main(int argc, char** argv) {
+int main(int argc, char **argv) {
 
-  GLFWwindow* window = glib::initialize(WIDTH, HEIGHT, "Window!");
-  if (window == NULL) { return -1; }
+  GLFWwindow *window = glib::initialize(WIDTH, HEIGHT, "Window!");
+  if (window == NULL) {
+    return -1;
+  }
   glViewport(0, 0, WIDTH, HEIGHT);
-  
+
   glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
   std::vector<float> vertices = glib::mesh_cube();
-  glib::buffer_t cube = glib::buffer_create(&vertices, NULL, glib::basic_layout);
+  glib::buffer_t cube =
+      glib::buffer_create(&vertices, NULL, glib::basic_layout);
 
   // Load model of backpack
-  glib::model_t backpack = glib::model_load("/home/z1ko/univr/graphics/data/models/backpack/backpack.obj");
+  glib::model_t backpack = glib::model_load(
+      "/home/z1ko/develop/glexercises/data/models/backpack/backpack.obj");
 
-  glib::program_t program = glib::program_create(shader_vertex, shader_fragment);
-  glib::program_t program_light = glib::program_create(shader_vertex_light, shader_fragment_light);
+  glib::program_t program =
+      glib::program_create(shader_vertex, shader_fragment);
+  glib::program_t program_light =
+      glib::program_create(shader_vertex_light, shader_fragment_light);
 
   const float FOV = 45.0f;
-  const float ASPECT_RATIO = (float)WIDTH/HEIGHT;
+  const float ASPECT_RATIO = (float)WIDTH / HEIGHT;
 
   glm::vec3 sun_pos = glm::vec3(10.0f, 10.0f, 10.0f);
   glm::vec3 sun_dir = glm::normalize(-sun_pos);
@@ -242,7 +242,7 @@ int main(int argc, char** argv) {
   float lastFrame = 0.0f;
 
   glEnable(GL_DEPTH_TEST);
-  while(!glfwWindowShouldClose(window)) {
+  while (!glfwWindowShouldClose(window)) {
 
     float currentTime = glfwGetTime();
     deltaTime = currentTime - lastFrame;
@@ -266,8 +266,8 @@ int main(int argc, char** argv) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Set camera position for light calculation
-    glib::program_uniform_3f(program, "cameraPos", 
-        camera.position.x, camera.position.y, camera.position.z);
+    glib::program_uniform_3f(program, "cameraPos", camera.position.x,
+                             camera.position.y, camera.position.z);
 
     // View matrix
     glm::mat4 view = glib::camera_view(camera);
@@ -281,39 +281,45 @@ int main(int argc, char** argv) {
     glib::program_uniform_mf(program_light, "proj", glm::value_ptr(proj));
 
     // Set material of normal cube
-    glib::program_uniform_1i(program, "diffuse_map",  0); // sampler
+    glib::program_uniform_1i(program, "diffuse_map", 0);  // sampler
     glib::program_uniform_1i(program, "specular_map", 1); // sampler
     glib::program_uniform_1i(program, "emission_map", 2); // sampler
     glib::program_uniform_1f(program, "shininess", 64.0f);
 
     // Set sunlight properties
     glib::program_uniform_3f(program, "sun.color", 0.3f, 0.3f, 0.7f);
-    glib::program_uniform_3f(program, "sun.direction", 
-      sun_dir.x, sun_dir.y, sun_dir.z);
+    glib::program_uniform_3f(program, "sun.direction", sun_dir.x, sun_dir.y,
+                             sun_dir.z);
 
     // Set pointlight properties
     glib::program_uniform_1i(program, "point_light_count", 1);
-    glib::program_uniform_1f(program, "point_light_list[0].constant",  1.0f);
-    glib::program_uniform_1f(program, "point_light_list[0].linear",    0.09f);
+    glib::program_uniform_1f(program, "point_light_list[0].constant", 1.0f);
+    glib::program_uniform_1f(program, "point_light_list[0].linear", 0.09f);
     glib::program_uniform_1f(program, "point_light_list[0].quadratic", 0.032f);
-    glib::program_uniform_3f(program, "point_light_list[0].color", 1.0f, 0.3f, 0.3f);
-    glib::program_uniform_3f(program, "point_light_list[0].position", 
-        point_light_pos.x, point_light_pos.y, point_light_pos.z);
+    glib::program_uniform_3f(program, "point_light_list[0].color", 1.0f, 0.3f,
+                             0.3f);
+    glib::program_uniform_3f(program, "point_light_list[0].position",
+                             point_light_pos.x, point_light_pos.y,
+                             point_light_pos.z);
 
     // Set spotlight properties
     glib::program_uniform_1i(program, "spot_light_count", 1);
-    glib::program_uniform_1f(program, "spot_light_list[0].cutoff_inner", glm::cos(glm::radians(12.5f)));
-    glib::program_uniform_1f(program, "spot_light_list[0].cutoff_outer", glm::cos(glm::radians(17.5f)));
-    glib::program_uniform_3f(program, "spot_light_list[0].color", 0.3f, 1.0f, 0.3f);
-    glib::program_uniform_3f(program, "spot_light_list[0].position", 
-        camera.position.x, camera.position.y, camera.position.z);
-    glib::program_uniform_3f(program, "spot_light_list[0].direction", 
-        camera.front.x, camera.front.y, camera.front.z);
-    
+    glib::program_uniform_1f(program, "spot_light_list[0].cutoff_inner",
+                             glm::cos(glm::radians(12.5f)));
+    glib::program_uniform_1f(program, "spot_light_list[0].cutoff_outer",
+                             glm::cos(glm::radians(17.5f)));
+    glib::program_uniform_3f(program, "spot_light_list[0].color", 0.3f, 1.0f,
+                             0.3f);
+    glib::program_uniform_3f(program, "spot_light_list[0].position",
+                             camera.position.x, camera.position.y,
+                             camera.position.z);
+    glib::program_uniform_3f(program, "spot_light_list[0].direction",
+                             camera.front.x, camera.front.y, camera.front.z);
+
     // Render backpack
     {
       glm::mat4 model = glm::mat4(1.0f);
-      //model = glm::scale(model, glm::vec3(0.5f));
+      // model = glm::scale(model, glm::vec3(0.5f));
 
       glib::program_uniform_mf(program, "model", glm::value_ptr(model));
       glib::model_render(backpack, program);
@@ -324,7 +330,7 @@ int main(int argc, char** argv) {
       glm::mat4 model = glm::mat4(1.0f);
       model = glm::translate(model, point_light_pos);
       model = glm::scale(model, glm::vec3(0.2f));
-      
+
       glib::program_uniform_mf(program_light, "model", glm::value_ptr(model));
       glib::render(cube, program_light);
     }
@@ -333,12 +339,10 @@ int main(int argc, char** argv) {
     glfwPollEvents();
   }
 
-  
   glfwTerminate();
   return 0;
 }
 
-void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
-    glViewport(0, 0, width, height);
+void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
+  glViewport(0, 0, width, height);
 }
-

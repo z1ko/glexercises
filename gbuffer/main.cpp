@@ -267,6 +267,20 @@ int main(int argc, char **argv) {
   glEnable(GL_DEPTH_TEST);
   while (!glfwWindowShouldClose(window)) {
 
+    // Regenerate lights
+    static bool pressed = false;
+    switch (glfwGetKey(window, GLFW_KEY_G)) {
+    case GLFW_PRESS:
+      if (!pressed) {
+        pressed = true;
+        generate_lights(lights);
+      }
+      break;
+    case GLFW_RELEASE:
+      pressed = false;
+      break;
+    }
+
     float currentTime = glfwGetTime();
     deltaTime = currentTime - lastFrame;
     lastFrame = currentTime;
@@ -362,7 +376,7 @@ int main(int argc, char **argv) {
     // Render point light
     {
       for (light_t &light : lights) {
-        glm::mat4 model = glm::mat4(1.0f);
+        glm::mat4 model = glm::mat3(1.0f);
         model = glm::translate(model, light.position);
         model = glm::scale(model, glm::vec3(0.2f));
 
@@ -384,6 +398,7 @@ int main(int argc, char **argv) {
 void generate_lights(std::vector<light_t> &lights) {
 
   srand(time(0));
+  lights.clear();
   for (int i = 0; i < LIGHT_COUNT; ++i) {
     float xPos = static_cast<float>(((rand() % 100) / 100.0) * 6.0 - 3.0);
     float yPos = static_cast<float>(((rand() % 100) / 100.0) * 6.0 - 4.0);

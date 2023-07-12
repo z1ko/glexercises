@@ -1,6 +1,6 @@
 
-#include <iostream>
 #include <cmath>
+#include <iostream>
 
 #define GLIB_INIT_IMPL
 #include <initialization.hpp>
@@ -16,7 +16,7 @@
 
 #include <mesh.hpp>
 
-const char* shader_vertex = R"(
+const char *shader_vertex = R"(
 
 #version 330 core
 layout (location = 0) in vec3 aPos;
@@ -37,7 +37,7 @@ void main() {
 
 )";
 
-const char* shader_fragment = R"(
+const char *shader_fragment = R"(
 
 #version 330 core
 out vec4 FragColor;
@@ -89,7 +89,7 @@ void main() {
 
 )";
 
-const char* shader_fragment_light = R"(
+const char *shader_fragment_light = R"(
 
 #version 330 core
 out vec4 FragColor;
@@ -104,34 +104,40 @@ void main() {
 
 )";
 
-int main(int argc, char** argv) {
+int main(int argc, char **argv) {
 
-  GLFWwindow* window = glib::initialize(640, 480, "Window!");
-  if (window == NULL) { return -1; }
+  GLFWwindow *window = glib::initialize(640, 480, "Window!");
+  if (window == NULL) {
+    return -1;
+  }
   glViewport(0, 0, 640, 480);
 
   std::vector<float> vertices = glib::mesh_cube_with_normals();
-  glib::buffer_t cube = glib::buffer_create(&vertices, NULL, [](){
+  glib::buffer_t cube = glib::buffer_create(&vertices, NULL, []() {
     // Position
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float),
+                          (void *)0);
     glEnableVertexAttribArray(0);
     // UV
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3* sizeof(float)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float),
+                          (void *)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
   });
 
-  glib::program_t program = glib::program_create(shader_vertex, shader_fragment);
-  glib::program_t light_program = glib::program_create(shader_vertex, shader_fragment_light);
+  glib::program_t program =
+      glib::program_create(shader_vertex, shader_fragment);
+  glib::program_t light_program =
+      glib::program_create(shader_vertex, shader_fragment_light);
 
   // Set slot of samplers in program
   glib::program_uniform_1i(program, "sampler1", 0);
 
   glib::texture_t texture1 = glib::texture_load(
-      "/home/z1ko/univr/graphics/data/textures/container.jpg", 
-      GL_RGB, GL_REPEAT);
+      "/home/z1ko/develop/glexercises/data/textures/container.jpg", GL_RGB,
+      GL_REPEAT);
 
   const float FOV = 45.0f;
-  const float ASPECT_RATIO = (float)640/480;
+  const float ASPECT_RATIO = (float)640 / 480;
 
   glib::camera_t camera = glib::camera_base(glm::vec3(0.0f, 0.0f, 6.0f));
   glm::vec3 light_pos = glm::vec3(0.0f, 0.5f, 0.0f);
@@ -140,7 +146,7 @@ int main(int argc, char** argv) {
   float lastFrame = 0.0f;
 
   glEnable(GL_DEPTH_TEST);
-  while(!glfwWindowShouldClose(window)) {
+  while (!glfwWindowShouldClose(window)) {
 
     float currentTime = glfwGetTime();
     deltaTime = currentTime - lastFrame;
@@ -157,12 +163,13 @@ int main(int argc, char** argv) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Set camera position for light calculation
-    glib::program_uniform_3f(program, "cameraPos", 
-        camera.position.x, camera.position.y, camera.position.z);
+    glib::program_uniform_3f(program, "cameraPos", camera.position.x,
+                             camera.position.y, camera.position.z);
 
     // View matrix
-    glib::program_uniform_mf(program, "view", glm::value_ptr(camera.view));
-    glib::program_uniform_mf(light_program, "view", glm::value_ptr(camera.view));
+    glm::mat4 view = glib::camera_view(camera);
+    glib::program_uniform_mf(program, "view", glm::value_ptr(view));
+    glib::program_uniform_mf(light_program, "view", glm::value_ptr(view));
 
     // Projection matrix
     glm::mat4 proj = glm::mat4(1.0f);
@@ -171,16 +178,18 @@ int main(int argc, char** argv) {
     glib::program_uniform_mf(light_program, "proj", glm::value_ptr(proj));
 
     // Set material of normal cube
-    glib::program_uniform_3f(program, "material.ambient",   1.0f, 0.5f, 0.31f);
-    glib::program_uniform_3f(program, "material.diffuse",   1.0f, 0.5f, 0.31f);
-    glib::program_uniform_3f(program, "material.specular",  0.5f, 0.5f, 0.5f );
+    glib::program_uniform_3f(program, "material.ambient", 1.0f, 0.5f, 0.31f);
+    glib::program_uniform_3f(program, "material.diffuse", 1.0f, 0.5f, 0.31f);
+    glib::program_uniform_3f(program, "material.specular", 0.5f, 0.5f, 0.5f);
     glib::program_uniform_1f(program, "material.shininess", 32.0f);
 
     // Set light properties
     glm::vec3 light_diffuse_color = glm::vec3(0.5f);
-    glib::program_uniform_3f(program, "light.position", light_pos.x, light_pos.y, light_pos.z);
-    glib::program_uniform_3f(program, "light.ambient",  0.2f, 0.2f, 0.2f);
-    glib::program_uniform_3f(program, "light.diffuse",  light_diffuse_color.x, light_diffuse_color.y, light_diffuse_color.z);
+    glib::program_uniform_3f(program, "light.position", light_pos.x,
+                             light_pos.y, light_pos.z);
+    glib::program_uniform_3f(program, "light.ambient", 0.2f, 0.2f, 0.2f);
+    glib::program_uniform_3f(program, "light.diffuse", light_diffuse_color.x,
+                             light_diffuse_color.y, light_diffuse_color.z);
     glib::program_uniform_3f(program, "light.specular", 1.0f, 1.0f, 1.0f);
 
     // Normal cube
@@ -195,7 +204,9 @@ int main(int argc, char** argv) {
     model = glm::translate(model, light_pos);
     model = glm::scale(model, glm::vec3(0.2f));
     glib::program_uniform_mf(light_program, "model", glm::value_ptr(model));
-    glib::program_uniform_3f(light_program, "light.ambient", light_diffuse_color.x, light_diffuse_color.y, light_diffuse_color.z);
+    glib::program_uniform_3f(light_program, "light.ambient",
+                             light_diffuse_color.x, light_diffuse_color.y,
+                             light_diffuse_color.z);
     glib::render(cube, light_program);
 
     glfwSwapBuffers(window);
@@ -205,4 +216,3 @@ int main(int argc, char** argv) {
   glfwTerminate();
   return 0;
 }
-

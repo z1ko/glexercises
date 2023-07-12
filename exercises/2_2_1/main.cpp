@@ -1,6 +1,6 @@
 
-#include <iostream>
 #include <cmath>
+#include <iostream>
 
 #define GLIB_INIT_IMPL
 #include <initialization.hpp>
@@ -16,7 +16,7 @@
 
 #include <mesh.hpp>
 
-const char* shader_vertex = R"(
+const char *shader_vertex = R"(
 
 #version 330 core
 layout (location = 0) in vec3 aPos;
@@ -37,7 +37,7 @@ void main() {
 
 )";
 
-const char* shader_fragment = R"(
+const char *shader_fragment = R"(
 
 #version 330 core
 out vec4 FragColor;
@@ -79,32 +79,37 @@ void main() {
 
 )";
 
-int main(int argc, char** argv) {
+int main(int argc, char **argv) {
 
-  GLFWwindow* window = glib::initialize(640, 480, "Window!");
-  if (window == NULL) { return -1; }
+  GLFWwindow *window = glib::initialize(640, 480, "Window!");
+  if (window == NULL) {
+    return -1;
+  }
   glViewport(0, 0, 640, 480);
 
   std::vector<float> vertices = glib::mesh_cube_with_normals();
-  glib::buffer_t cube = glib::buffer_create(&vertices, NULL, [](){
+  glib::buffer_t cube = glib::buffer_create(&vertices, NULL, []() {
     // Position
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float),
+                          (void *)0);
     glEnableVertexAttribArray(0);
     // UV
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3* sizeof(float)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float),
+                          (void *)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
   });
-  glib::program_t program = glib::program_create(shader_vertex, shader_fragment);
+  glib::program_t program =
+      glib::program_create(shader_vertex, shader_fragment);
 
   // Set slot of samplers in program
   glib::program_uniform_1i(program, "sampler1", 0);
 
   glib::texture_t texture1 = glib::texture_load(
-      "/home/z1ko/univr/graphics/data/textures/container.jpg", 
-      GL_RGB, GL_REPEAT);
+      "/home/z1ko/develop/glexercises/data/textures/container.jpg", GL_RGB,
+      GL_REPEAT);
 
   const float FOV = 45.0f;
-  const float ASPECT_RATIO = (float)640/480;
+  const float ASPECT_RATIO = (float)640 / 480;
 
   glib::camera_t camera = glib::camera_base(glm::vec3(0.0f, 0.0f, 6.0f));
   glm::vec3 light_pos = glm::vec3(0.0f, 0.5f, 0.0f);
@@ -113,7 +118,7 @@ int main(int argc, char** argv) {
   float lastFrame = 0.0f;
 
   glEnable(GL_DEPTH_TEST);
-  while(!glfwWindowShouldClose(window)) {
+  while (!glfwWindowShouldClose(window)) {
 
     float currentTime = glfwGetTime();
     deltaTime = currentTime - lastFrame;
@@ -125,18 +130,19 @@ int main(int argc, char** argv) {
     // Update light position
     light_pos.x = sinf(glfwGetTime()) * 3.0f;
     light_pos.z = cosf(glfwGetTime()) * 3.0f;
-    glib::program_uniform_3f(program, "lightPos",
-        light_pos.x, light_pos.y, light_pos.z);
+    glib::program_uniform_3f(program, "lightPos", light_pos.x, light_pos.y,
+                             light_pos.z);
 
     glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Set camera position for light calculation
-    glib::program_uniform_3f(program, "cameraPos", 
-        camera.position.x, camera.position.y, camera.position.z);
+    glib::program_uniform_3f(program, "cameraPos", camera.position.x,
+                             camera.position.y, camera.position.z);
 
     // View matrix
-    glib::program_uniform_mf(program, "view", glm::value_ptr(camera.view));
+    glm::mat4 view = glib::camera_view(camera);
+    glib::program_uniform_mf(program, "view", glm::value_ptr(view));
 
     // Projection matrix
     glm::mat4 proj = glm::mat4(1.0f);
@@ -157,4 +163,3 @@ int main(int argc, char** argv) {
   glfwTerminate();
   return 0;
 }
-
