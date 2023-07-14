@@ -245,16 +245,13 @@ int main(int argc, char **argv) {
       glib::program_create(shader_vertex, shader_fragment_light);
 
   glib::texture_t texture_diffuse = glib::texture_load(
-      "/home/z1ko/develop/glexercises/data/textures/container2.png", GL_RGBA,
-      GL_REPEAT);
+      "../../../data/textures/container2.png", GL_RGBA, GL_REPEAT);
 
   glib::texture_t texture_specular = glib::texture_load(
-      "/home/z1ko/develop/glexercises/data/textures/container2_specular.png",
-      GL_RGBA, GL_REPEAT);
+      "../../../data/textures/container2_specular.png", GL_RGBA, GL_REPEAT);
 
   glib::texture_t texture_emission = glib::texture_load(
-      "/home/z1ko/develop/glexercises/data/textures/matrix.jpg", GL_RGB,
-      GL_REPEAT);
+      "../../../data/textures/matrix.jpg", GL_RGB, GL_REPEAT);
 
   const float FOV = 45.0f;
   const float ASPECT_RATIO = (float)640 / 480;

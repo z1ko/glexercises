@@ -7,12 +7,14 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 cmake_policy(SET CMP0072 NEW)
 find_package(OpenGL REQUIRED)
 
-# Add assimp support
-add_subdirectory(../vendor/assimp/ ./assimp)
 
 add_executable(gbuffer ../vendor/glad/glad.c main.cpp)
 
-target_link_libraries(gbuffer ${CMAKE_DL_LIBS} assimp::assimp OpenGL::GL glfw)
+target_link_libraries(gbuffer ${CMAKE_DL_LIBS} OpenGL::GL glfw)
+
+# Add assimp
+target_link_directories(gbuffer PUBLIC "../vendor/assimp/build/bin/")
+target_link_libraries(gbuffer assimp)
 
 target_include_directories(
   gbuffer

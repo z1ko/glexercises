@@ -133,8 +133,7 @@ int main(int argc, char **argv) {
   glib::program_uniform_1i(program, "sampler1", 0);
 
   glib::texture_t texture1 = glib::texture_load(
-      "/home/z1ko/develop/glexercises/data/textures/container.jpg", GL_RGB,
-      GL_REPEAT);
+      "../../../data/textures/container.jpg", GL_RGB, GL_REPEAT);
 
   const float FOV = 45.0f;
   const float ASPECT_RATIO = (float)640 / 480;

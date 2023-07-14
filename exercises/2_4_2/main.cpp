@@ -115,11 +115,10 @@ int main(int argc, char **argv) {
       glib::program_create(shader_vertex, shader_fragment);
 
   glib::texture_t texture_diffuse = glib::texture_load(
-      "/home/z1ko/develop/glexercises/data/textures/container2.png", GL_RGBA,
-      GL_REPEAT);
+      "../../../data/textures/container2.png", GL_RGBA, GL_REPEAT);
 
   glib::texture_t texture_specular =
-      glib::texture_load("/home/z1ko/develop/glexercises/data/textures/"
+      glib::texture_load("../../../data/textures/"
                          "lighting_maps_specular_color.png",
                          GL_RGBA, GL_REPEAT);
 

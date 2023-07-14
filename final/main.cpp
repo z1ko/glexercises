@@ -213,8 +213,8 @@ int main(int argc, char **argv) {
       glib::buffer_create(&vertices, NULL, glib::basic_layout);
 
   // Load model of backpack
-  glib::model_t backpack = glib::model_load(
-      "/home/z1ko/develop/glexercises/data/models/backpack/backpack.obj");
+  glib::model_t backpack =
+      glib::model_load("../../data/models/backpack/backpack.obj");
 
   glib::program_t program =
       glib::program_create(shader_vertex, shader_fragment);

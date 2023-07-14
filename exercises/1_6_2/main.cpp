@@ -75,12 +75,10 @@ int main(int argc, char **argv) {
   glib::program_uniform_1i(program, "sampler2", 1);
 
   glib::texture_t texture1 = glib::texture_load(
-      "/home/z1ko/develop/glexercises/data/textures/container.jpg", GL_RGB,
-      GL_CLAMP_TO_EDGE);
+      "../../../data/textures/container.jpg", GL_RGB, GL_CLAMP_TO_EDGE);
 
   glib::texture_t texture2 = glib::texture_load(
-      "/home/z1ko/develop/glexercises/data/textures/awesomeface.png", GL_RGBA,
-      GL_REPEAT);
+      "../../../data/textures/awesomeface.png", GL_RGBA, GL_REPEAT);
 
   float elapsed = 0.0f, offset = 0.0f;
   while (!glfwWindowShouldClose(window)) {

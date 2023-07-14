@@ -99,8 +99,7 @@ int main(int argc, char **argv) {
   glib::program_uniform_1i(program, "sampler1", 0);
 
   glib::texture_t texture1 = glib::texture_load(
-      "/home/z1ko/develop/glexercises/data/textures/container.jpg", GL_RGB,
-      GL_REPEAT);
+      "../../../data/textures/container.jpg", GL_RGB, GL_REPEAT);
 
   std::vector<glm::vec3> cubePositions = {
       glm::vec3(0.0f, 0.0f, 0.0f),    glm::vec3(2.0f, 5.0f, -15.0f),

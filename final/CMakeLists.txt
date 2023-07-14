@@ -4,11 +4,13 @@ project(opengl)
 cmake_policy(SET CMP0072 NEW)
 find_package(OpenGL REQUIRED)
 
-# Add assimp support
-add_subdirectory(../vendor/assimp/ ./assimp)
 add_executable(final ../vendor/glad/glad.c main.cpp)
 
-target_link_libraries(final ${CMAKE_DL_LIBS} assimp::assimp OpenGL::GL glfw)
+target_link_libraries(final ${CMAKE_DL_LIBS} OpenGL::GL glfw)
+
+# Add assimp
+target_link_directories(final PUBLIC "../vendor/assimp/build/bin/")
+target_link_libraries(final assimp)
 
 target_include_directories(
   final
