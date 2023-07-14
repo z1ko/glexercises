@@ -22,7 +22,7 @@
 
 const int WIDTH = 1600;
 const int HEIGHT = 900;
-const int LIGHT_COUNT = 32;
+const int LIGHT_COUNT = 128;
 
 const char *shader_geometry_fs = R"(
 #version 330 core
@@ -43,6 +43,8 @@ uniform struct {
   sampler2D normal;
 } material;
 
+#define COMPONENT 3
+
 void main() {
   
   // Get normal in world-space
@@ -50,7 +52,16 @@ void main() {
   N = normalize(N * 2.0 - 1.0);
   N = TBN * N;
 
+#if COMPONENT == 0
   g_position = frag_pos;
+#elif COMPONENT == 1
+  g_position = N;
+#elif COMPONENT == 2
+  g_position = texture(material.diffuse, uv).rgb;
+#else
+  g_position = vec3(texture(material.specular, uv).r);
+#endif
+
   g_normal = N;
   g_color_spec = vec4(texture(material.diffuse, uv).rgb, 
     texture(material.specular, uv).r);
@@ -108,7 +119,7 @@ struct light_point_t {
   vec3 attenuation;
 }; 
 
-#define LIGHT_CAPACITY 32
+#define LIGHT_CAPACITY 128
 uniform light_point_t lights[LIGHT_CAPACITY];
 uniform vec3 camera_pos;
 
@@ -303,7 +314,6 @@ int main(int argc, char **argv) {
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-#if 1
     // Render all backpacks in gbuffer
     gbuffer_bind(gbuffer);
     {
@@ -320,9 +330,7 @@ int main(int argc, char **argv) {
       }
     }
     gbuffer_unbind();
-#endif
 
-#if 1
     // Lighting pass
     {
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -356,17 +364,15 @@ int main(int argc, char **argv) {
 
       glib::render(screen, program_lighting, GL_TRIANGLE_STRIP);
     }
-#endif
 
-#if 0
+#if 1
     // Blit result of geometry pass into screen
     glBindFramebuffer(GL_READ_FRAMEBUFFER, gbuffer.id);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
     glBlitFramebuffer(0, 0, WIDTH, HEIGHT, 0, 0, WIDTH, HEIGHT,
                       GL_COLOR_BUFFER_BIT, GL_NEAREST);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-#endif
-
+#else
     glBindFramebuffer(GL_READ_FRAMEBUFFER, gbuffer.id);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
     glBlitFramebuffer(0, 0, WIDTH, HEIGHT, 0, 0, WIDTH, HEIGHT,
@@ -388,6 +394,7 @@ int main(int argc, char **argv) {
       }
     }
 
+#endif
     glfwSwapBuffers(window);
     glfwPollEvents();
   }

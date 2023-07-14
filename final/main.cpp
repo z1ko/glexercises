@@ -44,7 +44,6 @@ layout (location = 3) in vec2 aUV;
 
 out vec2 uv;
 out vertex_output_tangent {
-  
   vec3 frag_pos;
   vec3 camera_pos;
   vec3 sun_dir;
