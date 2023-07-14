@@ -172,9 +172,9 @@ void main() {
   N = normalize(N * 2.0 - 1.0);
 
   // Calculate contribution of all lights
-  result += light_dir(N, V, tspace.sun_dir, vec3(0.15f, 0.15f, 0.3f));
+  result += light_dir(N, V, tspace.sun_dir, vec3(0.15f, 0.5f, 0.15f));
   result += light_point(N, V, tspace.light_pos, vec3(1.0f, 0.01f, 0.032f), vec3(1.0f, 0.3f, 0.3f));
-  result += light_spot(N, V, tspace.camera_pos, -tspace.camera_pos, vec2(6.5f, 8.5f), vec3(0.3f, 1.0f, 3.0f) * torch);
+  result += light_spot(N, V, tspace.camera_pos, -tspace.camera_pos, vec2(6.5f, 8.5f), vec3(0.3f, 0.3f, 1.0f) * torch);
 
   FragColor = vec4(result, 1.0f);
 }
